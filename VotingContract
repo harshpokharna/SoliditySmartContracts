@@ -1,0 +1,135 @@
+contract Ballot
+{
+    // Structure of a voter
+    struct Voter
+    {
+        bool hasVoted;
+        bool hasDelegated;
+        address delegatedTo;
+    }
+    
+    // Structure of a candidate
+    struct Candidate
+    {
+        bytes32 name;
+        uint numberOfVotes;
+    }
+    
+    address public chairpersonAddress;
+    
+    // Store a Voter structure for all possible addresses
+    mapping (address => Voter) public voterAddressMapping;
+    
+    // Dynamic sized array of candidates
+    Candidate[] public candidates;
+    
+    // Number of votes casted
+    uint numberOfVotesCasted = 0;
+    
+    // Called when contract is created
+    function Ballot(bytes32[] candidateNames)
+    {
+        // Save address of chairperson
+        chairpersonAddress = msg.sender;
+        
+        // Add all candidates to the array of candidates
+        for(uint i=0; i<candidateNames.length; i++)
+        {
+            candidates.push(Candidate({
+                name: candidateNames[i],
+                numberOfVotes: 0
+            }));
+        }
+    }
+    
+    // Call this function to delegate Vote
+    function delegateVote(address delegatedToAddress)
+    {
+        Voter voter = voterAddressMapping[msg.sender];
+        
+        if(voter.hasVoted)
+        {
+            return;
+        }
+        
+        if(voter.hasDelegated)
+        {
+            return;
+        }
+        
+        voter.hasDelegated = true;
+        voter.delegatedTo = delegatedToAddress;
+    }
+    
+    // Call this function to cast vote
+    function voteSelf(uint candidateNumber)
+    {
+        // Check if valid vote
+        if(candidateNumber >= candidates.length)
+        {
+            return;
+        }
+        
+        Voter voter = voterAddressMapping[msg.sender]; 
+        
+        // Check if already voted
+        if(voter.hasVoted)
+        {
+            return;
+        }
+        
+        // Check if delegated Vote
+        if(voter.hasDelegated)
+        {
+            return;
+        }
+        
+        // Add vote to candidate
+        candidates[candidateNumber].numberOfVotes += 1;
+        voter.hasVoted = true;
+        numberOfVotesCasted += 1;
+    }
+    
+    // Call this function to cast delegated vote
+    function voteDelegated(uint candidateNumber, address originalVoterAddress)
+    {
+        // Check if valid vote
+        if(candidateNumber >= candidates.length)
+        {
+            return;
+        }
+        
+        // Retreive original voter
+        Voter originalVoter = voterAddressMapping[originalVoterAddress];
+        
+        if(originalVoter.hasVoted)
+        {
+            return;
+        }
+        
+        if(msg.sender != originalVoter.delegatedTo)
+        {
+            return;
+        }else{
+            
+            candidates[candidateNumber].numberOfVotes += 1;
+            originalVoter.hasVoted = true;
+            numberOfVotesCasted += 1;
+        }
+    }
+    
+    // Check who won (winning criteria is 50% of votes casted)
+    function getWinningCandidate() constant returns (uint winningCandidateNumber)
+    {
+        winningCandidateNumber = candidates.length + 5;
+        
+        for(uint i=0; i<candidates.length; i++ )
+        {
+            if(candidates[i].numberOfVotes > (numberOfVotesCasted/2))
+            {
+                winningCandidateNumber = i;
+            }
+        }
+    }
+    
+}
