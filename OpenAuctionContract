@@ -1,0 +1,115 @@
+contract OpenAuction
+{
+    address beneficiaryAddress;
+    address public organiserAddress;
+    
+    address highestBidder;
+    uint public highestBid = 0;
+    uint public minimumBid = 0;
+    
+    uint public biddingStartTime;
+    uint public biddingTime;
+    
+    bool biddingEnded = false;
+    
+    // Mapping of addresses with corresponding withdrawable amount
+    mapping (address => uint) public pendingWithdrawals;
+    
+    // Called when contract is created
+    function OpenAuction(uint startBid, address beneficiary, uint bidTime)
+    {
+        if(startBid <= 0)
+        {
+            throw;
+        }
+        
+        organiserAddress = msg.sender;
+        beneficiaryAddress = beneficiary;
+        
+        minimumBid = startBid;
+    
+        biddingTime = bidTime;
+        biddingStartTime = now;
+    }
+    
+    // Call this function to place bid
+    function placeBid()
+    {
+        // Bidding ended
+        if(now > biddingStartTime + biddingTime)
+        {
+            throw;
+        }
+        
+        // Bid should be greater than minimum bid
+        if(msg.value < minimumBid)
+        {
+            throw;
+        }
+        
+        // Bid should be greater than highest bid till that time
+        if(msg.value <= highestBid)
+        {
+            throw;
+        }
+        
+        if(msg.value > highestBid && msg.value >= minimumBid)
+        {
+            // If there is already a bid, put that in withdrawables
+            if(highestBid != 0)
+            {
+                pendingWithdrawals[highestBidder] += highestBid;
+            }
+            
+            // Set this bid to highest bid
+            highestBid = msg.value;
+            highestBidder = msg.sender;
+        }
+    }
+    
+    // Call this function to withdraw pending amount
+    function withDrawMoney()
+    {
+        uint withdrawableAmount = pendingWithdrawals[msg.sender];
+        
+        pendingWithdrawals[msg.sender] = 0;
+        
+        if(!msg.sender.send(withdrawableAmount))
+        {
+            throw;
+        }
+    }
+    
+    // Call this function to end bidding
+    function endBidding()
+    {
+        // Only organiser can end bidding
+        if(msg.sender != organiserAddress)
+        {
+            throw;
+        }
+        
+        // Bidding time not ended
+        if(now < biddingStartTime + biddingTime)
+        {
+            throw;
+        }
+        
+        // This function was already called
+        if(biddingEnded)
+        {
+            throw;
+        }
+        
+        biddingEnded = true;
+        
+        uint amount = highestBid;
+        highestBid = 0;
+        
+        // Send amount to beneficiary
+        if(!beneficiaryAddress.send(amount))
+        {
+            throw;
+        }
+    }
+}
