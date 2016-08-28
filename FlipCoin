@@ -1,0 +1,30 @@
+contract FlipCoin{
+    
+    address  minter;
+    mapping(address => uint) public balances;
+    
+    function FlipCoin(){
+        minter = msg.sender;
+    }
+    
+    function mintNewCoins(uint numberOfCoins)
+    {
+        if(minter != msg.sender)
+        {
+            return;
+        }
+        
+        balances[msg.sender] = balances[msg.sender] + numberOfCoins;
+    }
+    
+    function sendCoins(address receiverAddress, uint numberOfCoins)
+    {
+        if(balances[msg.sender] < numberOfCoins)
+        {
+            return;
+        }
+        
+        balances[msg.sender] = balances[msg.sender] - numberOfCoins;
+        balances[receiverAddress] = balances[receiverAddress] + numberOfCoins;
+    }
+}
