@@ -7,3 +7,4 @@ Contains:
 2. Voting Contract
 3. Open Auction Contract
 4. CrowdFunding Contract
+5. ArrayContract
