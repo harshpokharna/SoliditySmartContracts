@@ -8,3 +8,4 @@ Contains:
 3. Open Auction Contract
 4. CrowdFunding Contract
 5. ArrayContract
+6. CreatingContractFromAnotherContract
