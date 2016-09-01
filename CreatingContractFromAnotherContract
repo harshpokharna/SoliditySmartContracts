@@ -1,0 +1,44 @@
+contract First{
+    
+    uint public x;
+    
+    function First(uint a)
+    {
+        x = a;
+    }
+    
+    function callMe(uint b)
+    {
+        x = x + b;
+    }
+}
+
+
+contract Second{
+    
+    First first;
+    
+    // Here the second contract knows the address at which first contract is deployed
+    function setFirst(address addressOfFirst)
+    {
+        // Here constructor of First is not called
+        first = First(addressOfFirst);
+    }
+    
+    function createNewFirst(uint arg)
+    {
+        // Constructor of First is called
+        first = new First(arg);
+    }
+    
+    function createNewFirstAndSendEther(uint arg, uint amount)
+    {
+        // Constructor of First is called
+        first = (new First).value(amount)(arg);
+    }
+    
+    function callFirst(uint arg)
+    {
+        first.callMe(arg);
+    }
+}
