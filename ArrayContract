@@ -1,0 +1,33 @@
+contract ArrayContract{
+    
+    // Fixed Sized array - Data Location is storage
+    uint[2**20] arrayOfALotOfIntegers;
+    
+    // Dynamic array of Pairs - Data Location is storage
+    bool[2][] arrayOfFlagPairs;
+    
+    // newArrayOfFlags - Data location is memory
+    function setAllFlagPairs(bool[2][] newArrayOfFlags)
+    {
+        // arrayOfFlags stores the entire array in storage 
+        arrayOfFlagPairs = newArrayOfFlags;
+    }
+    
+    function changeLengthOfArrayOfFlagPairs(uint newLength)
+    {
+        // If newLength is smaller, remaining elements are removed
+        arrayOfFlagPairs.length = newLength;
+    }
+    
+    function setFlagPair(uint index, bool value1, bool value2)
+    {
+        arrayOfFlagPairs[index][0] = value1;
+        arrayOfFlagPairs[index][1] = value2;
+    }
+    
+    function clear()
+    {
+        delete arrayOfFlagPairs; // Could also do 'arrayOfFlagPairs.length = 0'
+        delete arrayOfALotOfIntegers;
+    }
+}
